@@ -58,13 +58,31 @@ int insertTree_chiTree(PChiTree pChiTree, char node, char parentnode) {
 	struct EdgeNode * cur;
 	struct EdgeNode *tmp;
 	number=pChiTree->n;
+	
 	for(i=0;i<number;i++){
 		if(pChiTree->nodelist[i].info==parentnode){//找到父节点的位置赋给pos
 			pos=i;break;
 		}
 	}
+	//若输入错误找不到父节点，返回0
+	if(pos==-1){
+		printf("input error!");
+		return 0;
+	}
+	if(number>=pChiTree->MAXNUM){
+		printf("over flow!");
+		return 0;
+	}
+
 	head=pChiTree->nodelist[pos].children;//把当前父节点的children子链表头地址给head
 	
+	//先处理nodelist
+	//在nodelist中赋值，并使节点个数++
+	pChiTree->nodelist[number].info=node;
+	pChiTree->nodelist[number].children=NULL;//新构造的nodelist中的children置为空
+	pChiTree->n++;
+
+	//构造父节点的children子链表
 	if(head==NULL){//如果head为空，表示没有子链表头地址
 		head=(struct EdgeNode *)malloc(sizeof(struct EdgeNode));//申请空间
 		//构造子链表的第一个节点
@@ -73,13 +91,6 @@ int insertTree_chiTree(PChiTree pChiTree, char node, char parentnode) {
 
 		//把构造好的head赋给 当前父节点的children子链表
 		pChiTree->nodelist[pos].children=head;
-
-		//将下个节点的children子链表置为空，方便下次操作
-		pChiTree->nodelist[pChiTree->n].children=NULL;
-
-		//在nodelist中赋值，并使节点个数++
-		pChiTree->nodelist[number].info=node;
-		pChiTree->n++;
 		return 1;
 	}
 
@@ -97,12 +108,6 @@ int insertTree_chiTree(PChiTree pChiTree, char node, char parentnode) {
 	//构造完子链表head把该链表赋给当前父节点的children子链表
 	pChiTree->nodelist[pos].children=head;
 
-	//将下个节点的children子链表置为空，方便下次操作
-	pChiTree->nodelist[number].info=node;
-
-	//在nodelist中赋值，并使节点个数++
-	pChiTree->nodelist[pChiTree->n].children=NULL;
-	pChiTree->n++;
 	return 1;//插入成功 返回1
 }
 
@@ -169,6 +174,10 @@ void printScreen() {
 }
 
 void main() {
+	/**
+	请在充分思考后再查看此题解，否则没有意义的，记得后果自负！！！
+	*/
+
 	//way表示操作，i循环，pos节点位置，ans记录返回的节点位置
 	int way,i,pos,ans;
 	char val[5],par_val[5];//用字符数组避免读空格、换行
@@ -177,14 +186,18 @@ void main() {
 		printScreen();
 		scanf("%d",&way);
 		if(way==1){
+			printf("create success!");
 			root=createEmptyChildTree_seq(20);//将创建的根节点赋给root
 		}
 		else if(way==2){
+			printf("please input the root value:");
 			scanf("%s",val);//输入树根值
 			insertchiTree_root(root,val[0]);
 		}
 		else if(way==3){
+			printf("please input the parent value:");
 			scanf("%s",par_val);//输入父节点的值
+			printf("please input the son value:");
 			scanf("%s",val);//子节点的值
 			insertTree_chiTree(root,val[0],par_val[0]);//插入
 		}
