@@ -23,12 +23,10 @@ int assignLink(LinkSet s0, LinkSet s1);
 /*有序链表表示的集合中的插入操作*/
 int insertLink(LinkSet s0, DataType x);
 LinkSet create(){
+	//创建头结点
 	PNode tmp=(PNode )malloc(sizeof(struct Node));
-	LinkSet s;
 	tmp->link=NULL;
-	s=(LinkSet)malloc(sizeof(struct Node));
-	s->link=tmp;
-	return s;
+	return tmp;
 }
 
 int intersectionLink(LinkSet s0, LinkSet s1, LinkSet s2) {
@@ -128,23 +126,28 @@ void unitLink(LinkSet s0, LinkSet s1, LinkSet s2) {
 }
 
 void difference(LinkSet s0, LinkSet s1, LinkSet s2) {
-	int hash[305]={0};
-	LinkSet s0Head=s0->link->link;
-	LinkSet s1Head=s1->link->link;
-	while(s1Head!=NULL){
-		hash[s1Head->info]=1;
-		s1Head=s1Head->link;
-	}
-	while(s0Head!=NULL){
-		if(hash[s0Head->info]==0){
-			insertLink(s2,s0Head->info);
+	LinkSet h1=s0->link;//带头结点的
+	LinkSet h2=s1->link;
+	while(h1!=NULL){
+		while(h2!=NULL&&h2->info<h1->info){//此层while始终保持h2>=h1
+			h2=h2->link;//一直找到h2满足条件
 		}
-		s0Head=s0Head->link;
+		if(h2==NULL){
+			insertLink(s2,h1->info);
+		}
+		else if(h2->info==h1->info){//2个集合中元素大小一样,不插入
+			;//啥也不干。。。
+		}
+		else if(h2->info>h1->info){
+			insertLink(s2,h1->info);//符合要求插入
+		}
+		h1=h1->link;//往下找
 	}
 }
 
 void printNode(LinkSet  s) {
-	LinkSet head=s->link->link;
+	LinkSet head=s->link;//带头结点的指针，所以赋值的时候赋值s->link
+	//遍历
 	while(head!=NULL){
 		printf("%c ",head->info);
 		head=head->link;
@@ -166,39 +169,51 @@ void printScreen() {
 
 void main() {
 	int way;
-	char x[3];
-	LinkSet s0=create();
+	char x[3];//字符数组避免读换行空格
+	LinkSet s0=create();//创建集合
 	LinkSet s1=create();
-	LinkSet s2=create();
-	LinkSet tmp=create();
+	LinkSet s2;
+	
 	while(1){
 		printScreen();
 		scanf("%d",&way);
 		if(way==1){
+			//输入并插入
+			printf("input the inserted value:");
 			scanf("%s",x);
 			insertLink(s0,x[0]);
 		}
 		else if(way==2){
+			//输入并插入
+			printf("input the inserted value:");
 			scanf("%s",x);
 			insertLink(s1,x[0]);
 		}
 		else if(way==3){
+			//打印
 			printNode(s0);
 		}
 		else if(way==4){
+			//打印
 			printNode(s1);
 		}
 		else if(way==5){
+			//交
+			s2=create();
 			intersectionLink(s0,s1,s2);
 			printNode(s2);
 		}
 		else if(way==6){
+			//并
+			s2=create();
 			unitLink(s0,s1,s2);
 			printNode(s2);
 		}
 		else if(way==7){
-			difference(s0,s1,tmp);
-			printNode(tmp);
+			//差
+			s2=create();
+			difference(s0,s1,s2);
+			printNode(s2);
 		}
 	}
 }
