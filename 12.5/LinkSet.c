@@ -1,235 +1,219 @@
 #pragma warning(disable:4996)
-/*BinSearchTree.c*/
-/*二叉排序树*/
-
 #include <stdio.h>
 #include <stdlib.h>
-struct BinSearchNode;
-typedef struct BinSearchNode * PBinSearchNode;
-typedef int KeyType;
-//typedef int DataType;
-//typedef stu DataType;
-/*struct node{
-	char info[10],name[10];
+/*LinkSet.h*/
+/*集合的链接表示方式：类型和界面定义*/
+/*注意：这里没有给出全部的函数，只是教材中给出了实现的函数的声明*/
+
+struct  Node;
+typedef char DataType;
+typedef  struct Node  *PNode;
+struct  Node {
+	DataType  info;
+	PNode     link;
 };
-typedef struct node DataType;
-*/
+typedef  struct Node  *LinkSet;
 
-typedef struct {
-	char info[10],name[10];
-}stu;
-typedef stu* DataType;
-typedef struct {
-	KeyType key;				/* 字典元素的关键码字段	*/
-	DataType value;			    /* 字典元素的属性字段	*/
-}DicElement;
+/*求单链表表示集合的交集*/
+int intersectionLink(LinkSet s0, LinkSet s1, LinkSet s2);
 
-typedef struct {
-	int MAXNUM; 		/*字典中元素的个数上界*/
-	int n;					/*为字典中实际元素的个数 */
-	DicElement *element; 		 /*存放字典中的元素*/
-} SeqDictionary;
+/*集合的赋值*/
+int assignLink(LinkSet s0, LinkSet s1);
 
-struct BinSearchNode {
-	KeyType key;					/* 结点的关键码字段 */
-	PBinSearchNode llink, rlink;		/* 二叉树的左、右指针 */
-};
-typedef struct BinSearchNode * BinSearchTree;	/*二叉排序树	*/
-typedef BinSearchTree * PBinSearchTree;
-SeqDictionary* create(int m){
-	SeqDictionary* node=(SeqDictionary *)malloc(sizeof(SeqDictionary));
-	node->MAXNUM=m;
-	node->n=0;
-	node->element=(DicElement *)malloc(sizeof(DicElement)*m);
-	return node;
+/*有序链表表示的集合中的插入操作*/
+int insertLink(LinkSet s0, DataType x);
+LinkSet create(){
+	//创建头结点
+	PNode tmp=(PNode )malloc(sizeof(struct Node));
+	tmp->link=NULL;
+	return tmp;
 }
 
-int insertDictionary(SeqDictionary * pdic, KeyType key, DataType value) {
-	int i,number=pdic->n;
-	if (pdic->n >= pdic->MAXNUM) {   /* 溢出 */
-		printf("Overflow!\n");
-		return (0);
-	}
-	if (pdic->n == 0) {                    /*空顺序表插入 */
-		pdic->element[0].key = key;        /* 插入Key */
-		pdic->element[0].value = value;    /* 插入value */
-		pdic->n = 1;                       /* 元素个数为1 */
-		return (1);
-	}
-
-	pdic->element[number].key = key;        /* 插入Key */
-	pdic->element[number].value = value;    /* 插入value */
-	pdic->n = pdic->n + 1;                /* 元素个数加1 */
-	return (1);
-}
-/*二叉排序树的检索算法*/
-int search(PBinSearchTree ptree, KeyType key, PBinSearchNode *position) {
-	PBinSearchNode p, q;
-	p = *ptree;  q = p;
-	while (p != NULL) {
-		q = p; 		/* 用q记录父结点的位置 */
-		if (p->key == key) { 
-			*position = p; 
-			return(1); 
-		}		/* 检索成功 */
-		else if (p->key>key)	  
-			p = p->llink;			/* 进入左子树继续检索 */
-		else	
-			p = p->rlink;			/* 进入右子树继续检索 */
-	}
-	*position = q;  
-	return(0);					/* 检索失败 */
+int intersectionLink(LinkSet s0, LinkSet s1, LinkSet s2) {
+	PNode x;
+	/*判断集合是否存在*/
+	if (s0 == NULL || s1 == NULL || s2 == NULL) {
+		printf("No head node error");
+		return 0;
+	} 
+	s2->link = NULL;    /*将s2置成空集合*/
+	s0 = s0->link;  s1 = s1->link;
+	while (s0 != NULL&&s1 != NULL)
+		if (s0->info>s1->info)
+			s1 = s1->link;
+		else if (s0->info<s1->info)
+			s0 = s0->link;
+		else if (s0->info == s1->info) {   /*找到相同元素*/
+			x = (PNode)malloc(sizeof(struct Node)); /*分配结点空间*/
+			if (x == NULL) {
+				printf("out of space"); 
+				return 0;
+			}
+			x->info = s0->info; 
+			x->link = NULL; 
+			s2->link = x;   /*在s2中插入*/
+			s0 = s0->link;  /*指针后推*/
+			s1 = s1->link; 
+			s2 = s2->link; 
+		}
+		return 1;
 }
 
-/*二叉排序树中插入结点*/
-int insert(PBinSearchTree ptree, KeyType key) {
-	PBinSearchNode p, position;
-	if (search(ptree, key, &position) == 1) 
-		return 1;   /* 已存在关键码为key的结点 */
-	p = (PBinSearchNode)malloc(sizeof(struct BinSearchNode));/* 申请新结点 */
-	/* 申请空间出错 */
-	if (p == NULL) { 
-		printf("Error\n");  return 0; 
-	}	
-	/* 对新结点的赋值 */
-	p->key = key;	
-	p->llink = p->rlink = NULL;		
-	/* 原树为空树 */
-	if (position == NULL)	
-		*ptree = p;					
-	else if (key<position->key) 
-		position->llink = p;	  /* 插入position的左子树 */
-	else  
-		position->rlink = p;				/* 插入position的右子树 */
+int assignLink(LinkSet s0, LinkSet s1) {
+	PNode  x;
+	/*判断集合是否存在*/
+	if (s0 == NULL || s1 == NULL) { 
+		printf("No head node error"); 
+		return 0; 
+	} 
+	s0->link = NULL;    /*将s0置成空集合*/
+	s1 = s1->link;
+	while (s1 != NULL) {
+		x = (PNode)malloc(sizeof(struct Node)); /*分配结点空间*/
+		if (x == NULL) {
+			printf("out of space");
+			return 0;
+		}
+		x->info = s1->info;
+		x->link = NULL;
+		s0->link = x; /*在s0中插入*/
+		s1 = s1->link; s0 = s0->link; /*指针后推*/
+	}
 	return 1;
 }
 
-/*二叉排序树的构造*/
-int creatSearchTree(PBinSearchTree ptree, SeqDictionary *dic) {
-	int i;
-	*ptree = NULL; 			/* 将二叉排序树置空 */
-	for (i = 0; i<dic->n; i++)
-		if (!insert(ptree, dic->element[i].key)) 
-			return 0;			/* 将新结点插入树中 */
-	return 1;
+int insertLink(LinkSet s0, DataType x) {
+	PNode  temp;
+	/*判断集合是否存在*/
+	if (s0 == NULL) {
+		printf("No head node error");
+		return 0;
+	}
+	temp = (PNode)malloc(sizeof(struct Node)); /*分配结点空间*/
+	if (temp == NULL) {
+		printf("out of space");
+		return 0;
+	}
+	while (s0->link != NULL) {
+		if (s0->link->info == x) {
+			//printf("Data already exist");
+			return 1;
+		}
+		else if (s0->link->info<x){
+			s0 = s0->link;
+		}
+		else if (s0->link->info>x) {/*找到插入位置*/
+			temp->info = x;
+			temp->link = s0->link;
+			s0->link = temp;
+			return 1; /*插入*/
+		}
+	}
+	if (s0->link == NULL) { /*插到最后*/
+		temp->info = x;  
+		temp->link = s0->link;
+		s0->link = temp;  
+		return 1;
+	}
 }
 
-/*二叉排序树的删除*/
-int delete(PBinSearchTree ptree, KeyType key) {
-	PBinSearchNode parentp, p, r;
-	p = *ptree;  parentp = NULL;
-	while (p != NULL) {
-		if (p->key == key)  
-			break;				/* 找到了关键码为key的结点 */
-		parentp = p;
-		if (p->key>key)  
-			p = p->llink;			/* 进入左子树 */
-		else  
-			p = p->rlink;						/* 进入右子树 */
+void unitLink(LinkSet s0, LinkSet s1, LinkSet s2) {
+	assignLink(s2, s0);
+	while (s1->link != NULL) {
+		s1 = s1->link;
+		insertLink(s2, s1->info);
 	}
-	if (p == NULL)  
-		return 0;					/* 二叉排序树中无关键码为key的结点 */
-	if (p->llink == NULL) { 					/* 结点*p无左子树 */
-		/* 被删除的结点是原二叉排序树的根结点*/
-		if (parentp == NULL) 
-			*ptree = p->rlink;		
-		else if (parentp->llink == p)	
-			parentp->llink = p->rlink;	/*将*p的右子树链到其父结点的左链*/
-		else	
-			parentp->rlink = p->rlink;	/* 将*p的右子树链到其父结点的右链上 */
-	}
-	else {								/* 结点*p有左子树 */
-		r = p->llink;
-		while (r->rlink != NULL)  
-			r = r->rlink;		/* 在*p的左子树中找最右下结点*r */
-		r->rlink = p->rlink;	/* 用*r的右指针指向*p的右子女 */
-		if (parentp == NULL)  
-			*ptree = p->llink;
-		else if (parentp->llink == p)	
-			parentp->llink = p->llink;	/* 用*p的左子女代替*p */
-		else	 
-			parentp->rlink = p->llink;
-	}
-	free(p);  
-	return 1;									/* 释放被删除结点 */
 }
 
-void printDictionary(SeqDictionary * pdic) {
-	int i;
-	for(i=0;i<pdic->n;i++){
-		printf("key: %d  classinfo:%s   name:%s\n",pdic->element[i].key,pdic->element[i].value->info,pdic->element[i].value->name);
+void difference(LinkSet s0, LinkSet s1, LinkSet s2) {
+	LinkSet h1=s0->link;//带头结点的
+	LinkSet h2=s1->link;
+	while(h1!=NULL){
+		while(h2!=NULL&&h2->info<h1->info){//此层while始终保持h2>=h1
+			h2=h2->link;//一直找到h2满足条件
+		}
+		if(h2==NULL){
+			insertLink(s2,h1->info);
+		}
+		else if(h2->info==h1->info){//2个集合中元素大小一样,不插入
+			;//啥也不干。。。
+		}
+		else if(h2->info>h1->info){
+			insertLink(s2,h1->info);//符合要求插入
+		}
+		h1=h1->link;//往下找
+	}
+}
+
+void printNode(LinkSet  s) {
+	LinkSet head=s->link;//带头结点的指针，所以赋值的时候赋值s->link
+	//遍历
+	while(head!=NULL){
+		printf("%c ",head->info);
+		head=head->link;
 	}
 }
 
 void printScreen() {
 	printf("\n**********************\n");
-	printf("1. 创建字典\n");
-	printf("2. 二叉排序树中插入结点(创建索引)\n");
-	printf("3. 二叉排序树中检索Key(关键码)\n");
-	printf("4. 删除二叉排序树中的结点\n");
-	printf("5. 打印字典\n");
+	printf("1. 将字符插入集合S0中\n");
+	printf("2. 将字符插入集合S1中\n");
+	printf("3. 打印集合S0中元素\n");
+	printf("4. 打印集合S1中元素\n");
+	printf("5. 集合S0与集合S1的交\n");
+	printf("6. 集合S0与集合S1的并\n");
+	printf("7. 集合S0与集合S1的差\n");
 	printf("0. 退出\n");
 	printf("************************\n");
 }
-void query(SeqDictionary * pdic,int key){
-	int i;
-	for(i=0;i<pdic->n;i++){
-		if(pdic->element[i].key==key){
-			printf("key: %d  classinfo:%s   name:%s\n",pdic->element[i].key,pdic->element[i].value->info,pdic->element[i].value->name);
-			return ;
-		}
-		
-	}
-}
+
 void main() {
-	int way,key,val,res,x;
-	SeqDictionary* dic=NULL;
-	PBinSearchTree root=(PBinSearchTree)malloc(sizeof(struct BinSearchNode));
-	PBinSearchNode pos=(PBinSearchNode)malloc(sizeof(struct BinSearchNode));
-	DataType stud=(DataType)malloc(sizeof(stu));
+	int way;
+	char x[3];//字符数组避免读换行空格
+	LinkSet s0=create();//创建集合
+	LinkSet s1=create();
+	LinkSet s2;
+	
 	while(1){
 		printScreen();
 		scanf("%d",&way);
 		if(way==1){
-			dic=create(50);
-			while(1){
-				printf("input the key:");
-				scanf("%d",&key);
-				if(key==0) break;
-				stud=(DataType)malloc(sizeof(stu));
-				printf("input the classinfo:");
-				scanf("%s",stud->info);
-				printf("input the name:");
-				scanf("%s",stud->name);
-				insertDictionary(dic,key,stud);
-			}
+			//输入并插入
+			printf("input the inserted value:");
+			scanf("%s",x);
+			insertLink(s0,x[0]);
 		}
 		else if(way==2){
-			creatSearchTree(root,dic);
+			//输入并插入
+			printf("input the inserted value:");
+			scanf("%s",x);
+			insertLink(s1,x[0]);
 		}
 		else if(way==3){
-			printf("input the key you want:");
-			scanf("%d",&x);
-			res=search(root,x,&pos);
-			if(res!=0){ 
-				printf("find is ok!");
-				query(dic,pos->key);
-			}
-			else printf("not find!");
-			
+			//打印
+			printNode(s0);
 		}
 		else if(way==4){
-			printf("input the key you want to delete:");
-			scanf("%d",&x);
-			res=delete(root,x);
-			if(res!=0) printf("delete is ok!");
-			else printf("delete defeat!");
+			//打印
+			printNode(s1);
 		}
 		else if(way==5){
-			printDictionary(dic);
+			//交
+			s2=create();
+			intersectionLink(s0,s1,s2);
+			printNode(s2);
 		}
-		
-		
-		
+		else if(way==6){
+			//并
+			s2=create();
+			unitLink(s0,s1,s2);
+			printNode(s2);
+		}
+		else if(way==7){
+			//差
+			s2=create();
+			difference(s0,s1,s2);
+			printNode(s2);
+		}
 	}
 }
