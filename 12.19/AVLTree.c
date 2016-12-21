@@ -245,8 +245,9 @@ void main() {
 	int input;
 	PAVLTree ptree;
 	DataType stud;//学生类型变量
-	ptree = (AVLTree*)malloc(sizeof(struct AVLNode));
+	ptree = (AVLTree*)malloc(sizeof(struct AVLNode));	
 	(*ptree) = NULL;
+
 	while (1) {
 		printScreen();
 		printf("输入菜单: ");
